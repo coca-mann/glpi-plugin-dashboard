@@ -1,21 +1,16 @@
 # Atenção: 
-# Com o lançamento do GLPI 10 este plugin será descontinuado.
+##  This plugin is a fork of
+
+https://github.com/99net/glpi-dashboard
+
+which was a fork of
+
+https://github.com/stdonato/glpi-dashboard
 Mais informações em: 
 
 https://glpi-project.org/
 
 https://glpi10.com/
-
-
-# Attention:
-# With the release of GLPI 10 this plugin will be discontinued. 
-More info:
-
-https://glpi-project.org/ 
-
-https://glpi10.com/
-
-
 
 
 # Dashboard
