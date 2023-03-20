@@ -6,11 +6,6 @@ https://github.com/99net/glpi-dashboard
 which was a fork of
 
 https://github.com/stdonato/glpi-dashboard
-Mais informações em: 
-
-https://glpi-project.org/
-
-https://glpi10.com/
 
 
 # Dashboard
