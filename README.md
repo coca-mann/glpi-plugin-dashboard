@@ -5,7 +5,7 @@ Contribuição: https://github.com/serviceticst/glpi-plugin-dashboard/issues/1
 #############################################################
 
 # ATTENTION: 
-## ZEROED OUT DUE TO DISPLAYING SOME BLANK PAGES IN THE PLUGIN, PLEASE HAVE AT LEAST ONE OPEN TICKET.
+## A ZEROED DATABASE MAY CAUSE SOME BLANK PAGES IN THE PLUGIN, PLEASE HAVE AT LEAST ONE TICKET OPEN.
 Contribution: https://github.com/serviceticst/glpi-plugin-dashboard/issues/1
 
 ##  This plugin is a fork of
