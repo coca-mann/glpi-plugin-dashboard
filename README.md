@@ -1,5 +1,5 @@
 # ATENÇÃO: 
-## BASE ZERADA POR TRAZER ALGUMAS PÁGINA EM BRANCO NO PLUGIN, TENHA PELO MENOS UM CHAMADO ABERTO.
+## BASE ZERADA PODE TRAZER ALGUMAS PÁGINA EM BRANCO NO PLUGIN, TENHA PELO MENOS UM CHAMADO ABERTO.
 Contribuição: https://github.com/serviceticst/glpi-plugin-dashboard/issues/1 
 
 #############################################################
