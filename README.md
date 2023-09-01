@@ -1,4 +1,11 @@
-# Atenção: 
+# ATENÇÃO: 
+## BASE ZERADA POR TRAZER ALGUMAS PÁGINA EM BRANCO NO PLUGIN, TENHA PELO MENOS UM CHAMADO ABERTO. 
+
+#############################################################
+
+# ATTENTION: 
+## ZEROED OUT DUE TO DISPLAYING SOME BLANK PAGES IN THE PLUGIN, PLEASE HAVE AT LEAST ONE OPEN TICKET.
+
 ##  This plugin is a fork of
 
 https://github.com/99net/glpi-dashboard
@@ -7,6 +14,7 @@ which was a fork of
 
 https://github.com/stdonato/glpi-dashboard
 
+#############################################################
 
 # Dashboard
 
@@ -17,16 +25,13 @@ https://github.com/stdonato/glpi-dashboard
 
 3 - Acessar no menu do GLPI: Plugins -> Dashboard
 
-
 #############################################################
-
 
 1 - Perform the installation as any plugin, unzipping the file and copying the folder to the plugins folder in GLPI server.
 
 2 - In the GLPI interface to access Setup -> Plugins for installation.
 
 3 - Get in GLPI Menu: Plugins -> Dashboard
-
 
 ##############################################################
 
