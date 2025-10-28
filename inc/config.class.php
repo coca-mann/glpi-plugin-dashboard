@@ -63,12 +63,22 @@ class PluginDashboardConfig extends CommonDBTM {
       
       //get entity coordinates
       if(isset($_GET['id'])) {
-	      $query_coo = "SELECT * FROM glpi_plugin_dashboard_map WHERE entities_id = ".$_GET['id'];
-	      $result_coo = $DB->query($query_coo) or die ("erro");
-			$ent_info = $DB->fetchAssoc($result_coo);
-			
-			$LNG = $ent_info['lng'];
-			$LAT = $ent_info['lat'];
+	      $iterator = $DB->request([
+	         'FROM' => 'glpi_plugin_dashboard_map',
+	         'WHERE' => [
+	            'entities_id' => $_GET['id']
+	         ],
+	         'LIMIT' => 1
+	      ]);
+	      
+	      if (count($iterator) > 0) {
+	         $ent_info = $iterator->current();
+	         $LNG = $ent_info['lng'];
+	         $LAT = $ent_info['lat'];
+	      } else {
+	         $LNG = '';
+	         $LAT = '';
+	      }
 		}
 		else {
 			$LNG = '';
@@ -125,11 +135,18 @@ class PluginDashboardConfig extends CommonDBTM {
    static function getValue($name, $user_id = 0) {
       global $DB;
       
-      $query = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = '".$name."' AND users_id = '".$user_id."'";
-      $result = $DB->query($query);
+      $iterator = $DB->request([
+         'FROM' => 'glpi_plugin_dashboard_config',
+         'WHERE' => [
+            'name' => $name,
+            'users_id' => $user_id
+         ],
+         'LIMIT' => 1
+      ]);
       
-      if ($result && $DB->numrows($result) > 0) {
-         return $DB->result($result, 0, 'value');
+      if (count($iterator) > 0) {
+         $row = $iterator->current();
+         return $row['value'];
       }
       
       return '';
