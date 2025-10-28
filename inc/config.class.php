@@ -166,7 +166,8 @@ class PluginDashboardConfig extends CommonDBTM {
       if ($num_years == -1) {
           // Obter todos os anos, em ordem ascendente
           $iterator = $DB->request([
-              'SELECT'    => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+              'SELECT'    => [new \Glpi\DB\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
+              'DISTINCT'  => true,
               'FROM'      => 'glpi_tickets',
               'WHERE'     => [
                   'is_deleted' => 0,
@@ -178,11 +179,9 @@ class PluginDashboardConfig extends CommonDBTM {
 
       } else {
           // Obter os últimos N anos, em ordem descendente
-          // NOTA: A consulta original do plugin tinha um bug provável na linha:
-          // "AND DATE_FORMAT(date, '%Y') IN (".$num_years.")"
-          // Isso foi removido, pois $num_years é um limite (LIMIT) e não uma lista para o IN.
           $iterator = $DB->request([
-              'SELECT'    => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+              'SELECT'    => [new \Glpi\DB\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
+              'DISTINCT'  => true,
               'FROM'      => 'glpi_tickets',
               'WHERE'     => [
                   'is_deleted' => 0,
