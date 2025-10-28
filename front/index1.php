@@ -2,7 +2,7 @@
 
 include ("../../../inc/includes.php");
 
-global $DB;
+global $CFG_GLPI;
 
 Session::checkLoginUser();
 

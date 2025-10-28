@@ -163,24 +163,26 @@ class PluginDashboardConfig extends CommonDBTM {
       
       if($num_years == -1) {
          $iterator = $DB->request([
-            'SELECT' => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+            'SELECT' => ['DATE_FORMAT(date, "%Y") AS year'],
             'FROM' => 'glpi_tickets',
             'WHERE' => [
                'is_deleted' => 0,
                'date' => ['!=', null]
             ],
-            'ORDER' => 'year ASC'
+            'ORDER' => 'year ASC',
+            'GROUP' => 'year'
          ]);
       } else {
          $iterator = $DB->request([
-            'SELECT' => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+            'SELECT' => ['DATE_FORMAT(date, "%Y") AS year'],
             'FROM' => 'glpi_tickets',
             'WHERE' => [
                'is_deleted' => 0,
                'date' => ['!=', null],
                'DATE_FORMAT(date, "%Y")' => ['IN', explode(',', $num_years)]
             ],
-            'ORDER' => 'year DESC'
+            'ORDER' => 'year DESC',
+            'GROUP' => 'year'
          ]);
       }
       
