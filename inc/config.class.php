@@ -166,7 +166,8 @@ class PluginDashboardConfig extends CommonDBTM {
       if ($num_years == -1) {
           // Obter todos os anos, em ordem ascendente
           $iterator = $DB->request([
-              'SELECT'    => [new \Glpi\DB\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
+              // CORREÇÃO: Usando o namespace \Glpi\DBAL\QueryExpression
+              'SELECT'    => [new \Glpi\DBAL\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
               'DISTINCT'  => true,
               'FROM'      => 'glpi_tickets',
               'WHERE'     => [
@@ -180,7 +181,8 @@ class PluginDashboardConfig extends CommonDBTM {
       } else {
           // Obter os últimos N anos, em ordem descendente
           $iterator = $DB->request([
-              'SELECT'    => [new \Glpi\DB\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
+              // CORREÇÃO: Usando o namespace \Glpi\DBAL\QueryExpression
+              'SELECT'    => [new \Glpi\DBAL\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
               'DISTINCT'  => true,
               'FROM'      => 'glpi_tickets',
               'WHERE'     => [
