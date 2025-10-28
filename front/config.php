@@ -2,7 +2,6 @@
 
 
 include ("../../../inc/includes.php");
-include ("../../../inc/config.php");
 
 Session::checkLoginUser();
 Session::checkRight("profile", READ);
@@ -94,9 +93,19 @@ function chart(theme) {
 					<?php
 					
 					// selected entity for index
-					$sql_e = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'entity' AND users_id = ".$_SESSION['glpiID']."";
-					$result_e = $DB->query($sql_e);					
-					$prev_ent = $DB->fetchAssoc($result_e);	
+					$criteria_e = [
+						'SELECT' => 'value',
+						'FROM' => 'glpi_plugin_dashboard_config',
+						'WHERE' => [
+							'name' => 'entity',
+							'users_id' => $_SESSION['glpiID']
+						]
+					];
+					$result_e = $DB->request($criteria_e);
+					$prev_ent = [];
+					if ($row_e = $result_e->next()) {
+						$prev_ent = $row_e;
+					}	
 					
 			      echo '<div id="datas-tec2" class="col-md-12 fluid" style="background-color:#fff; margin-top:20px;">';
 					
@@ -118,20 +127,22 @@ function chart(theme) {
 					$ents = implode(",",$entities);
 					
 					// lista de entidades
-					$sql_ent = "
-					SELECT id, name, completename AS cname
-					FROM `glpi_entities`
-					WHERE id IN (".$ents.")
-					ORDER BY `name` ASC ";
+					$criteria_ent = [
+						'SELECT' => ['id', 'name', 'completename AS cname'],
+						'FROM' => 'glpi_entities',
+						'WHERE' => [
+							'id' => $entities
+						],
+						'ORDER' => 'name ASC'
+					];
 					
-					$result_ent = $DB->query($sql_ent);
+					$result_ent = $DB->request($criteria_ent);
 					
 					$arr_ent = array();
 					
-					while ($row_result = $DB->fetchAssoc($result_ent))
-					 {
+					while ($row_result = $result_ent->next()) {
 					    $v_row_result = $row_result['id'];
-					    $arr_ent[$v_row_result] = $row_result['cname'] ;
+					    $arr_ent[$v_row_result] = $row_result['cname'];
 					 }
 					 
 					//$arr_ent[-2] = "-- ". __('Select a entity', 'dashboard') . " --" ;

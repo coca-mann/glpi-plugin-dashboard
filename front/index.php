@@ -1,14 +1,23 @@
 <?php
 
 include ("../../../inc/includes.php");
-include ("../../../inc/config.php");
 global $DB;
 
 Session::checkLoginUser();
 
-$query_lay = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'layout' AND users_id = ".$_SESSION['glpiID']." ";																
-					$result_lay = $DB->query($query_lay);					
-					$layout = $DB->result($result_lay,0,'value');
+$criteria = [
+	'SELECT' => 'value',
+	'FROM' => 'glpi_plugin_dashboard_config',
+	'WHERE' => [
+		'name' => 'layout',
+		'users_id' => $_SESSION['glpiID']
+	]
+];
+$result_lay = $DB->request($criteria);
+$layout = '';
+if ($row = $result_lay->next()) {
+	$layout = $row['value'];
+}
 					
 //redirect to index
 if($layout == '0')
