@@ -69,10 +69,10 @@ function plugin_dashboard_install(){
 		
 		//Config entities
 		$query_ent = "SELECT users_id FROM glpi_plugin_dashboard_config WHERE name = 'entity' AND value = '-1' ";		
-		$result = $DB->request($query_ent);		
+		$result = $DB->query($query_ent);		
 		
-		foreach ($result as $row) {
-			$query = "UPDATE glpi_plugin_dashboard_config SET value = '' WHERE name = 'entity' AND users_id = ".$row['users_id']." ";
+		while ($row = $DB->fetchArray($result)) {
+			$query = "UPDATE glpi_plugin_dashboard_config SET value = '' WHERE name = 'entity' AND users_id = ".intval($row['users_id'])." ";
 			$DB->doQuery($query);
 		}				
 	}
