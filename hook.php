@@ -6,7 +6,7 @@ function plugin_dashboard_install(){
 	
 	if (! $DB->TableExists("glpi_plugin_dashboard_count")) {
         $query = "CREATE TABLE `glpi_plugin_dashboard_count` 
-        (`id` INTEGER AUTO_INCREMENT, `type` INTEGER , `quant` INTEGER, PRIMARY KEY (`id`))
+        (`id` INT UNSIGNED AUTO_INCREMENT, `type` INT UNSIGNED , `quant` INT UNSIGNED, PRIMARY KEY (`id`))
 						ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci; ";
 						
         $DB->doQuery($query);
@@ -54,7 +54,7 @@ function plugin_dashboard_install(){
 		
 		// Tentar adicionar AUTO_INCREMENT ao campo id (ignora erro se já existir)
 		try {
-			$query_alt = "ALTER TABLE `glpi_plugin_dashboard_count` MODIFY `id` INTEGER AUTO_INCREMENT; ";		
+			$query_alt = "ALTER TABLE `glpi_plugin_dashboard_count` MODIFY `id` INT UNSIGNED AUTO_INCREMENT; ";		
 			$DB->doQuery($query_alt);
 		} catch (Exception $e) {
 			// Ignora erro se AUTO_INCREMENT já existir
@@ -68,10 +68,17 @@ function plugin_dashboard_install(){
 		$DB->doQuery($query_alt);
 		
 		//Config entities
-		$query_ent = "SELECT users_id FROM glpi_plugin_dashboard_config WHERE name = 'entity' AND value = '-1' ";		
-		$result = $DB->query($query_ent);		
+		$criteria = [
+			'SELECT' => 'users_id',
+			'FROM' => 'glpi_plugin_dashboard_config',
+			'WHERE' => [
+				'name' => 'entity',
+				'value' => '-1'
+			]
+		];
+		$result = $DB->request($criteria);
 		
-		while ($row = $DB->fetchArray($result)) {
+		while ($row = $result->next()) {
 			$query = "UPDATE glpi_plugin_dashboard_config SET value = '' WHERE name = 'entity' AND users_id = ".intval($row['users_id'])." ";
 			$DB->doQuery($query);
 		}				
