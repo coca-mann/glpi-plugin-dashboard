@@ -162,32 +162,29 @@ class PluginDashboardConfig extends CommonDBTM {
       global $DB;
       
       if($num_years == -1) {
-         $iterator = $DB->request([
-            'SELECT' => ['DATE_FORMAT(date, \'%Y\') AS year'],
-            'FROM' => 'glpi_tickets',
-            'WHERE' => [
-               'is_deleted' => 0,
-               'date' => ['!=', null]
-            ],
-            'ORDER' => 'year ASC',
-            'GROUP' => 'year'
-         ]);
+         $query = "SELECT DISTINCT DATE_FORMAT(date, '%Y') AS year
+            FROM glpi_tickets
+            WHERE glpi_tickets.is_deleted = '0'
+            AND date IS NOT NULL
+            GROUP BY year
+            ORDER BY year ASC";
+         
+         $result = $DB->query($query);
       } else {
-         $iterator = $DB->request([
-            'SELECT' => ['DATE_FORMAT(date, \'%Y\') AS year'],
-            'FROM' => 'glpi_tickets',
-            'WHERE' => [
-               'is_deleted' => 0,
-               'date' => ['!=', null],
-               'DATE_FORMAT(date, \'%Y\')' => ['IN', explode(',', $num_years)]
-            ],
-            'ORDER' => 'year DESC',
-            'GROUP' => 'year'
-         ]);
+         $query = "SELECT DISTINCT DATE_FORMAT(date, '%Y') AS year
+            FROM glpi_tickets
+            WHERE glpi_tickets.is_deleted = '0'
+            AND date IS NOT NULL
+            AND DATE_FORMAT(date, '%Y') IN (".$num_years.")
+            GROUP BY year
+            ORDER BY year DESC
+            LIMIT ".$num_years;
+         
+         $result = $DB->query($query);
       }
       
       $years = [];
-      foreach ($iterator as $row) {
+      while ($row = $DB->fetchAssoc($result)) {
          $years[] = $row['year'];
       }
       
