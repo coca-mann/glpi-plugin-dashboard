@@ -153,43 +153,57 @@ class PluginDashboardConfig extends CommonDBTM {
    }
 
    /**
-    * Get years for dashboard statistics
-    *
-    * @param int $num_years Number of years to retrieve
-    * @return array Array of years
-    */
-   static function getYears($num_years = -1) {
+     * Get years for dashboard statistics
+     *
+     * @param int $num_years Number of years to retrieve
+     * @return array Array of years
+     */
+    static function getYears($num_years = -1) {
       global $DB;
-      
-      if($num_years == -1) {
-         $query = "SELECT DISTINCT DATE_FORMAT(date, '%Y') AS year
-            FROM glpi_tickets
-            WHERE glpi_tickets.is_deleted = '0'
-            AND date IS NOT NULL
-            GROUP BY year
-            ORDER BY year ASC";
-         
-         $result = $DB->query($query);
+
+      $iterator = null;
+
+      if ($num_years == -1) {
+          // Obter todos os anos, em ordem ascendente
+          $iterator = $DB->request([
+              'SELECT'    => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+              'FROM'      => 'glpi_tickets',
+              'WHERE'     => [
+                  'is_deleted' => 0,
+                  'date'       => ['IS NOT', null]
+              ],
+              'GROUPBY'   => ['year'],
+              'ORDERBY'   => ['year ASC']
+          ]);
+
       } else {
-         $query = "SELECT DISTINCT DATE_FORMAT(date, '%Y') AS year
-            FROM glpi_tickets
-            WHERE glpi_tickets.is_deleted = '0'
-            AND date IS NOT NULL
-            AND DATE_FORMAT(date, '%Y') IN (".$num_years.")
-            GROUP BY year
-            ORDER BY year DESC
-            LIMIT ".$num_years;
-         
-         $result = $DB->query($query);
+          // Obter os últimos N anos, em ordem descendente
+          // NOTA: A consulta original do plugin tinha um bug provável na linha:
+          // "AND DATE_FORMAT(date, '%Y') IN (".$num_years.")"
+          // Isso foi removido, pois $num_years é um limite (LIMIT) e não uma lista para o IN.
+          $iterator = $DB->request([
+              'SELECT'    => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+              'FROM'      => 'glpi_tickets',
+              'WHERE'     => [
+                  'is_deleted' => 0,
+                  'date'       => ['IS NOT', null]
+              ],
+              'GROUPBY'   => ['year'],
+              'ORDERBY'   => ['year DESC'],
+              'LIMIT'     => $num_years
+          ]);
       }
-      
+
       $years = [];
-      while ($row = $DB->fetchAssoc($result)) {
-         $years[] = $row['year'];
+      if ($iterator) {
+          // Itera sobre o resultado do $DB->request
+          foreach ($iterator as $row) {
+              $years[] = $row['year'];
+          }
       }
-      
+
       return $years;
-   }
+  }
 
    /**
     * Get ticket statistics for a year
