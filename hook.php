@@ -52,22 +52,12 @@ function plugin_dashboard_install(){
 
 	if ($DB->TableExists("glpi_plugin_dashboard_count")) {
 		
-		// Verificar se a tabela já tem a estrutura correta
-		$check_query = "SHOW COLUMNS FROM glpi_plugin_dashboard_count LIKE 'id'";
-		$result = $DB->request($check_query);
-		$has_auto_increment = false;
-		
-		foreach ($result as $row) {
-			if (strpos($row['Extra'], 'auto_increment') !== false) {
-				$has_auto_increment = true;
-				break;
-			}
-		}
-		
-		// Se não tem AUTO_INCREMENT, adicionar
-		if (!$has_auto_increment) {
+		// Tentar adicionar AUTO_INCREMENT ao campo id (ignora erro se já existir)
+		try {
 			$query_alt = "ALTER TABLE `glpi_plugin_dashboard_count` MODIFY `id` INTEGER AUTO_INCREMENT; ";		
 			$DB->doQuery($query_alt);
+		} catch (Exception $e) {
+			// Ignora erro se AUTO_INCREMENT já existir
 		}
 	}
 	
