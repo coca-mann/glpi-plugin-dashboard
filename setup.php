@@ -22,7 +22,7 @@ function plugin_version_dashboard(){
 
 	return array('name'			=> __('Dashboard','dashboard'),
 					'version' 			=> '1.0.3',
-					'author'			   => '<a href="https://plugins.glpi-project.org/#/plugin/dashboard"> Stevenes Donato </b> </a>',
+					'author'			   => 'Juliano Ostroski',
 					'license'		 	=> 'GPLv2+',
 					'homepage'			=> 'https://plugins.glpi-project.org/#/plugin/dashboard',
 					'minGlpiVersion'	=> '11.0.0'
