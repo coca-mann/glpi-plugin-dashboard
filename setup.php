@@ -31,11 +31,7 @@ function plugin_version_dashboard(){
 
 
 function plugin_dashboard_check_prerequisites(){
-     if (GLPI_VERSION >= 9.4){
-         return true;
-     } else {
-         echo "GLPI version NOT compatible. Requires GLPI >= 9.4";
-     }
+     return true;
 }
 
 
