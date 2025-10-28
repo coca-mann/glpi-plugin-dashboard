@@ -6,7 +6,7 @@ function plugin_dashboard_install(){
 	
 	if (! $DB->TableExists("glpi_plugin_dashboard_count")) {
         $query = "CREATE TABLE `glpi_plugin_dashboard_count` 
-        (`type` INTEGER , `id` INTEGER, `quant` INTEGER, PRIMARY KEY (`id`))
+        (`id` INTEGER AUTO_INCREMENT, `type` INTEGER , `quant` INTEGER, PRIMARY KEY (`id`))
 						ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci; ";
 						
         $DB->doQuery($query);
@@ -52,8 +52,23 @@ function plugin_dashboard_install(){
 
 	if ($DB->TableExists("glpi_plugin_dashboard_count")) {
 		
-		$query_alt = "ALTER TABLE `glpi_plugin_dashboard_count` DROP PRIMARY KEY, ADD PRIMARY KEY(`type`,`id`); ";		
-		$DB->doQuery($query_alt);	
+		// Verificar se a tabela já tem a estrutura correta
+		$check_query = "SHOW COLUMNS FROM glpi_plugin_dashboard_count LIKE 'id'";
+		$result = $DB->request($check_query);
+		$has_auto_increment = false;
+		
+		foreach ($result as $row) {
+			if (strpos($row['Extra'], 'auto_increment') !== false) {
+				$has_auto_increment = true;
+				break;
+			}
+		}
+		
+		// Se não tem AUTO_INCREMENT, adicionar
+		if (!$has_auto_increment) {
+			$query_alt = "ALTER TABLE `glpi_plugin_dashboard_count` MODIFY `id` INTEGER AUTO_INCREMENT; ";		
+			$DB->doQuery($query_alt);
+		}
 	}
 	
 	
