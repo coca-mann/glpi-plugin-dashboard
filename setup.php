@@ -25,7 +25,7 @@ function plugin_version_dashboard(){
 					'author'			   => '<a href="https://plugins.glpi-project.org/#/plugin/dashboard"> Stevenes Donato </b> </a>',
 					'license'		 	=> 'GPLv2+',
 					'homepage'			=> 'https://plugins.glpi-project.org/#/plugin/dashboard',
-					'minGlpiVersion'	=> '9.4'
+					'minGlpiVersion'	=> '11.0.0'
 					);
 }
 
