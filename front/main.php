@@ -1,7 +1,6 @@
 <?php
 
 include ("../../../inc/includes.php");
-include ("../../../inc/config.php");
 
 global $DB;
 
@@ -10,9 +9,8 @@ Session::checkLoginUser();
 $userID = $_SESSION['glpiID'];
 
 # entity in index
-$sql_e = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'entity' AND users_id = ".$userID."";
-$result_e = $DB->query($sql_e);
-$sel_ent = $DB->result($result_e,0,'value');
+$config = new PluginDashboardConfig();
+$sel_ent = $config->getValue('entity', $userID);
 	
 
 if($sel_ent == '' OR $sel_ent == -1) {
@@ -21,9 +19,8 @@ if($sel_ent == '' OR $sel_ent == -1) {
 }
 
 else {
-	$query = "SELECT name FROM glpi_entities WHERE id IN (".$sel_ent.")";
-	$result = $DB->query($query);
-	$ent_name1 = $DB->result($result,0,'name');
+	$entity = new Entity();
+	$ent_name1 = $entity->getName($sel_ent);
 	$ent_name = __('Tickets Statistics','dashboard')." :  ". $ent_name1 ;	
 }	
 
@@ -42,18 +39,14 @@ else {
 }
 
 # years in index
-$sql_y = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'num_years' AND users_id = ".$userID."";
-$result_y = $DB->query($sql_y);
-$num_years = $DB->result($result_y,0,'value');
+$num_years = $config->getValue('num_years', $userID);
 
 if($num_years == '') {
 	$num_years = -1;
 }
 
 # color theme
-$sql_theme = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'theme' AND users_id = ".$userID."";
-$result_theme = $DB->query($sql_theme);
-$theme = $DB->result($result_theme,0,'value');
+$theme = $config->getValue('theme', $userID);
 $style = $theme;
 
 if($theme == '' || substr($theme,0,5) == 'skin-' ) {
@@ -65,9 +58,7 @@ $_SESSION['style'] = $theme;
 
 
 # background
-$sql_back = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'back' AND users_id = ".$userID."";
-$result_back = $DB->query($sql_back);
-$back = $DB->result($result_back,0,'value');
+$back = $config->getValue('back', $userID);
 
 if($back == '') {
 	$back = 'bg1.jpg';	
@@ -99,12 +90,9 @@ $_SESSION['back'] = $back;
 	    case "6": $dia = __('Saturday','dashboard'); break;  
     }
 
-	$sql_photo = "SELECT picture 
-					FROM glpi_users
-					WHERE id = ".$userID." ";
-	
-	$res_photo = $DB->query($sql_photo);
-	$pic = $DB->result($res_photo,0,'picture');
+	$user = new User();
+	$user_data = $user->getFromDB($userID);
+	$pic = $user_data['picture'] ?? '';
 	
 	$photo_url = User::getURLForPicture($pic);  
 ?>
@@ -216,56 +204,8 @@ $month = date("Y-m");
 $hoje = date("Y-m-d");
 
 //selecionar anos 
-if($num_years == -1) {
-	
-	$query_y = "SELECT DISTINCT DATE_FORMAT( date, '%Y' ) AS year
-	FROM glpi_tickets
-	WHERE glpi_tickets.is_deleted = '0'
-	AND date IS NOT NULL	
-	ORDER BY year ASC ";
-}
-else {
-
-	$query_y = "SELECT DISTINCT DATE_FORMAT( date, '%Y' ) AS year
-	FROM glpi_tickets
-	WHERE glpi_tickets.is_deleted = '0'
-	AND date IS NOT NULL
-	AND DATE_FORMAT( glpi_tickets.date, '%Y' ) IN (".$num_years.") 
-	ORDER BY year DESC";
-
-}	
-/*if($num_years == 1) {
-	
-	$query_y = "SELECT DISTINCT DATE_FORMAT( date, '%Y' ) AS year
-	FROM glpi_tickets
-	WHERE glpi_tickets.is_deleted = '0'
-	AND date IS NOT NULL
-	ORDER BY year DESC
-	LIMIT ".$num_years."";
-}
-
-if($num_years > 1) {
-	
-	$query_y = "SELECT DISTINCT DATE_FORMAT( date, '%Y' ) AS year
-	FROM glpi_tickets
-	WHERE glpi_tickets.is_deleted = '0'
-	AND date IS NOT NULL
-	ORDER BY year DESC
-	LIMIT ".$num_years."";
-	
-}*/
-
-$result_y = $DB->query($query_y);
-
-//numero de anos para eixos Y
-$conta_y = $DB->numrows($result_y);
-
-$arr_years = array();
-
-while ($row_y = $DB->fetchAssoc($result_y))		
-{ 
-	$arr_years[] = $row_y['year'];			
-} 
+$arr_years = PluginDashboardConfig::getYears($num_years);
+$conta_y = count($arr_years);
 
 if($num_years > 1) {
 	$arr_years = array_reverse($arr_years);
@@ -277,15 +217,7 @@ else {
 
 
 //chamados ano
-$sql_ano =	"SELECT COUNT(glpi_tickets.id) as total        
-      FROM glpi_tickets
-      LEFT JOIN glpi_entities ON glpi_tickets.entities_id = glpi_entities.id
-      WHERE glpi_tickets.is_deleted = '0' 
-      AND DATE_FORMAT( glpi_tickets.date, '%Y' ) IN (".$years.") 
-      ".$entidade." ";
-
-$result_ano = $DB->query($sql_ano);
-$total_ano = $DB->fetchAssoc($result_ano);
+$total_ano = PluginDashboardConfig::getTicketCountForYear($ano, $sel_ent);
 
 
 $sql_ano_ab =	"SELECT COUNT(glpi_tickets.id) as total        

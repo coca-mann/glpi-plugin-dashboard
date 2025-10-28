@@ -152,6 +152,175 @@ class PluginDashboardConfig extends CommonDBTM {
       return '';
    }
 
+   /**
+    * Get years for dashboard statistics
+    *
+    * @param int $num_years Number of years to retrieve
+    * @return array Array of years
+    */
+   static function getYears($num_years = -1) {
+      global $DB;
+      
+      if($num_years == -1) {
+         $iterator = $DB->request([
+            'SELECT' => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+            'FROM' => 'glpi_tickets',
+            'WHERE' => [
+               'is_deleted' => 0,
+               'date' => ['!=', null]
+            ],
+            'ORDER' => 'year ASC'
+         ]);
+      } else {
+         $iterator = $DB->request([
+            'SELECT' => ['DISTINCT DATE_FORMAT(date, "%Y") AS year'],
+            'FROM' => 'glpi_tickets',
+            'WHERE' => [
+               'is_deleted' => 0,
+               'date' => ['!=', null],
+               'DATE_FORMAT(date, "%Y")' => ['IN', explode(',', $num_years)]
+            ],
+            'ORDER' => 'year DESC'
+         ]);
+      }
+      
+      $years = [];
+      foreach ($iterator as $row) {
+         $years[] = $row['year'];
+      }
+      
+      return $years;
+   }
+
+   /**
+    * Get ticket statistics for a year
+    *
+    * @param string $year Year to get statistics for
+    * @param string $entity_filter Entity filter
+    * @return int Number of tickets
+    */
+   static function getTicketCountForYear($year, $entity_filter = '') {
+      global $DB;
+      
+      $where = [
+         'is_deleted' => 0,
+         'DATE_FORMAT(date, "%Y")' => $year
+      ];
+      
+      if ($entity_filter) {
+         $where['entities_id'] = ['IN', explode(',', $entity_filter)];
+      }
+      
+      $iterator = $DB->request([
+         'COUNT' => 'id',
+         'FROM' => 'glpi_tickets',
+         'WHERE' => $where
+      ]);
+      
+      $row = $iterator->current();
+      return $row['COUNT'];
+   }
+
+   /**
+    * Get ticket statistics for a month
+    *
+    * @param string $month Month to get statistics for (YYYY-MM format)
+    * @param string $entity_filter Entity filter
+    * @return int Number of tickets
+    */
+   static function getTicketCountForMonth($month, $entity_filter = '') {
+      global $DB;
+      
+      $where = [
+         'is_deleted' => 0,
+         'DATE_FORMAT(date, "%Y-%m")' => $month
+      ];
+      
+      if ($entity_filter) {
+         $where['entities_id'] = ['IN', explode(',', $entity_filter)];
+      }
+      
+      $iterator = $DB->request([
+         'COUNT' => 'id',
+         'FROM' => 'glpi_tickets',
+         'WHERE' => $where
+      ]);
+      
+      $row = $iterator->current();
+      return $row['COUNT'];
+   }
+
+   /**
+    * Get ticket statistics for today
+    *
+    * @param string $today Today's date (YYYY-MM-DD format)
+    * @param string $entity_filter Entity filter
+    * @return int Number of tickets
+    */
+   static function getTicketCountForToday($today, $entity_filter = '') {
+      global $DB;
+      
+      $where = [
+         'is_deleted' => 0,
+         'DATE_FORMAT(date, "%Y-%m-%d")' => $today
+      ];
+      
+      if ($entity_filter) {
+         $where['entities_id'] = ['IN', explode(',', $entity_filter)];
+      }
+      
+      $iterator = $DB->request([
+         'COUNT' => 'id',
+         'FROM' => 'glpi_tickets',
+         'WHERE' => $where
+      ]);
+      
+      $row = $iterator->current();
+      return $row['COUNT'];
+   }
+
+   /**
+    * Get user count
+    *
+    * @param string $entity_filter Entity filter
+    * @return int Number of users
+    */
+   static function getUserCount($entity_filter = '') {
+      global $DB;
+      
+      $where = [
+         'is_deleted' => 0,
+         'is_active' => 1
+      ];
+      
+      if ($entity_filter) {
+         $iterator = $DB->request([
+            'COUNT' => 'DISTINCT glpi_users.id',
+            'FROM' => 'glpi_users',
+            'LEFT JOIN' => [
+               'glpi_profiles_users' => [
+                  'ON' => [
+                     'glpi_users' => 'id',
+                     'glpi_profiles_users' => 'users_id'
+                  ]
+               ]
+            ],
+            'WHERE' => array_merge($where, [
+               'glpi_profiles_users.entities_id' => ['IN', explode(',', $entity_filter)]
+            ])
+         ]);
+      } else {
+         $iterator = $DB->request([
+            'COUNT' => 'id',
+            'FROM' => 'glpi_users',
+            'WHERE' => $where
+         ]);
+      }
+      
+      $row = $iterator->current();
+      return $row['COUNT'];
+   }
+
 
 }
 ?>   
