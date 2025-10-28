@@ -1,7 +1,6 @@
 <?php
 
 include ("../../../inc/includes.php");
-include ("../../../inc/config.php");
 
 global $DB;
 
@@ -10,18 +9,16 @@ Session::checkLoginUser();
 $userID = $_SESSION['glpiID'];
 
 # entity in index
-$sql_e = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'entity' AND users_id = ".$userID."";
-$result_e = $DB->query($sql_e);
-$sel_ent = $DB->result($result_e,0,'value');
+$config = new PluginDashboardConfig();
+$sel_ent = $config->getValue('entity', $userID);
 
 if($sel_ent == '') { 	
 	//if($sel_ent == '') { 	
    //$sel_ent1 = explode(",",$sel_ent);
 	$entities = $_SESSION['glpiactiveentities'];
 	$sel_ent = implode(",",$entities);		
-	$query = "SELECT name FROM glpi_entities WHERE id IN (".$sel_ent.")";
-	$result = $DB->query($query);
-	$ent_name1 = $DB->result($result,0,'name');
+	$entity = new Entity();
+	$ent_name1 = $entity->getName($entities[0]);
 	if(count($entities)>1) {
 		$ent_name = __('Tickets Statistics','dashboard');
 	} else {
@@ -34,25 +31,20 @@ elseif(strstr($sel_ent,",")) {
 }
 
 else {
-	$query = "SELECT name FROM glpi_entities WHERE id IN (".$sel_ent.")";
-	$result = $DB->query($query);
-	$ent_name1 = $DB->result($result,0,'name');
+	$entity = new Entity();
+	$ent_name1 = $entity->getName($sel_ent);
 	$ent_name = __('Tickets Statistics','dashboard')." :  ". $ent_name1 ;
 }
 
 # years in index
-$sql_y = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'num_years' AND users_id = ".$userID."";
-$result_y = $DB->query($sql_y);
-$num_years = $DB->result($result_y,0,'value');
+$num_years = $config->getValue('num_years', $userID);
 
 if($num_years == '') {
 	$num_years = 0;
 }
 
 # color theme
-$sql_theme = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'theme' AND users_id = ".$userID."";
-$result_theme = $DB->query($sql_theme);
-$theme = $DB->result($result_theme,0,'value');
+$theme = $config->getValue('theme', $userID);
 $style = $theme;
 
 if($theme == '' || substr($theme,0,5) == 'skin-' ) {
@@ -65,9 +57,7 @@ $_SESSION['style'] = $theme;
 
 
 # background
-$sql_back = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'back' AND users_id = ".$userID."";
-$result_back = $DB->query($sql_back);
-$back = $DB->result($result_back,0,'value');
+$back = $config->getValue('back', $userID);
 
 if($back == '') {
 	$back = 'bg1.jpg';	
@@ -76,9 +66,7 @@ $_SESSION['back'] = $back;
 
 
 # charts colors 
-$sql_colors = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'charts_colors' AND users_id = ".$userID."";
-$result_colors = $DB->query($sql_colors);
-$colors = $DB->result($result_colors,0,'value');
+$colors = $config->getValue('charts_colors', $userID);
 
 if($colors == '') {
 	$colors = 'default.js';	
@@ -112,9 +100,9 @@ $_SESSION['charts_colors'] = $colors;
     }
     
 //user image and name
-	$sql_photo = "SELECT picture, name FROM glpi_users WHERE id = $userID ";	
-	$res_photo = $DB->query($sql_photo);
-	$pic = $DB->result($res_photo,0,'picture');
+	$user = new User();
+	$user_data = $user->getFromDB($userID);
+	$pic = $user_data['picture'] ?? '';
 	
 	$photo_url = User::getURLForPicture($pic);      
 
@@ -127,10 +115,7 @@ else {
 }
 		
 //version check	              								              								
-	$query_up = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = 'update'";																
-	$result_up = $DB->query($query_up);
-
-	$up_option = $DB->result($result_up,0,'value');	
+	$up_option = $config->getValue('update', 0);	
 	              
 	if($up_option == 1) {  
 	

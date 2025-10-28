@@ -115,6 +115,26 @@ class PluginDashboardConfig extends CommonDBTM {
       Html::closeForm();
    }
 
+   /**
+    * Get configuration value for a user
+    *
+    * @param string $name Configuration name
+    * @param int $user_id User ID
+    * @return string Configuration value
+    */
+   static function getValue($name, $user_id = 0) {
+      global $DB;
+      
+      $query = "SELECT value FROM glpi_plugin_dashboard_config WHERE name = '".$name."' AND users_id = '".$user_id."'";
+      $result = $DB->query($query);
+      
+      if ($result && $DB->numrows($result) > 0) {
+         return $DB->result($result, 0, 'value');
+      }
+      
+      return '';
+   }
+
 
 }
 ?>   
