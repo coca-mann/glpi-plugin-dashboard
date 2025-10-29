@@ -211,91 +211,124 @@ class PluginDashboardConfig extends CommonDBTM {
    }
 
    /**
-    * Get ticket statistics for a year
-    *
-    * @param string $year Year to get statistics for
-    * @param string $entity_filter Entity filter
-    * @return int Number of tickets
-    */
-   static function getTicketCountForYear($year, $entity_filter = '') {
+     * Get ticket statistics for a year
+     *
+     * @param string $year Year to get statistics for
+     * @param string $entity_filter Entity filter (comma-separated IDs)
+     * @return int Number of tickets
+     */
+    static function getTicketCountForYear($year, $entity_filter = '') {
       global $DB;
-      
-      $where = [
-         'is_deleted' => 0,
-         'DATE_FORMAT(date, "%Y")' => $year
-      ];
-      
-      if ($entity_filter) {
-         $where['entities_id'] = ['IN', explode(',', $entity_filter)];
-      }
-      
-      $iterator = $DB->request([
-         'COUNT' => 'id',
-         'FROM' => 'glpi_tickets',
-         'WHERE' => $where
-      ]);
-      
-      $row = $iterator->current();
-      return $row['COUNT'];
-   }
 
-   /**
-    * Get ticket statistics for a month
-    *
-    * @param string $month Month to get statistics for (YYYY-MM format)
-    * @param string $entity_filter Entity filter
-    * @return int Number of tickets
-    */
-   static function getTicketCountForMonth($month, $entity_filter = '') {
-      global $DB;
-      
       $where = [
-         'is_deleted' => 0,
-         'DATE_FORMAT(date, "%Y-%m")' => $month
+          'is_deleted' => 0,
+          // CORREÇÃO: Usando 'RAW' para a condição DATE_FORMAT
+          'RAW'        => [
+              "DATE_FORMAT(`date`, '%Y')" => $year // Use backticks `date` se necessário
+          ]
       ];
-      
-      if ($entity_filter) {
-         $where['entities_id'] = ['IN', explode(',', $entity_filter)];
-      }
-      
-      $iterator = $DB->request([
-         'COUNT' => 'id',
-         'FROM' => 'glpi_tickets',
-         'WHERE' => $where
-      ]);
-      
-      $row = $iterator->current();
-      return $row['COUNT'];
-   }
 
-   /**
-    * Get ticket statistics for today
-    *
-    * @param string $today Today's date (YYYY-MM-DD format)
-    * @param string $entity_filter Entity filter
-    * @return int Number of tickets
-    */
-   static function getTicketCountForToday($today, $entity_filter = '') {
-      global $DB;
-      
-      $where = [
-         'is_deleted' => 0,
-         'DATE_FORMAT(date, "%Y-%m-%d")' => $today
-      ];
-      
-      if ($entity_filter) {
-         $where['entities_id'] = ['IN', explode(',', $entity_filter)];
+      // Sanitiza e adiciona filtro de entidade se presente
+      if (!empty($entity_filter)) {
+          $entity_ids = array_filter(array_map('intval', explode(',', $entity_filter)));
+          if (!empty($entity_ids)) {
+              $where['entities_id'] = ['IN', $entity_ids];
+          }
       }
-      
+
       $iterator = $DB->request([
-         'COUNT' => 'id',
-         'FROM' => 'glpi_tickets',
-         'WHERE' => $where
+          'COUNT' => '*', // Conta todas as linhas que correspondem
+          'FROM'  => 'glpi_tickets',
+          'WHERE' => $where
       ]);
-      
-      $row = $iterator->current();
-      return $row['COUNT'];
-   }
+
+      // Verifica se houve resultado antes de acessá-lo
+      if ($iterator && count($iterator) > 0) {
+          $row = $iterator->current();
+          // Retorna o primeiro valor (o COUNT) independentemente do nome da chave
+          return reset($row);
+      }
+
+      return 0; // Retorna 0 se não houver tickets
+  }
+
+  /**
+   * Get ticket statistics for a month
+   *
+   * @param string $month Month to get statistics for (YYYY-MM format)
+   * @param string $entity_filter Entity filter (comma-separated IDs)
+   * @return int Number of tickets
+   */
+  static function getTicketCountForMonth($month, $entity_filter = '') {
+      global $DB;
+
+      $where = [
+          'is_deleted' => 0,
+          // CORREÇÃO: Usando 'RAW' para a condição DATE_FORMAT
+          'RAW'        => [
+              "DATE_FORMAT(`date`, '%Y-%m')" => $month
+          ]
+      ];
+
+      if (!empty($entity_filter)) {
+          $entity_ids = array_filter(array_map('intval', explode(',', $entity_filter)));
+          if (!empty($entity_ids)) {
+              $where['entities_id'] = ['IN', $entity_ids];
+          }
+      }
+
+      $iterator = $DB->request([
+          'COUNT' => '*',
+          'FROM'  => 'glpi_tickets',
+          'WHERE' => $where
+      ]);
+
+      if ($iterator && count($iterator) > 0) {
+          $row = $iterator->current();
+          return reset($row);
+      }
+
+      return 0;
+  }
+
+  /**
+   * Get ticket statistics for today
+   *
+   * @param string $today Today's date (YYYY-MM-DD format)
+   * @param string $entity_filter Entity filter (comma-separated IDs)
+   * @return int Number of tickets
+   */
+  static function getTicketCountForToday($today, $entity_filter = '') {
+      global $DB;
+
+      $where = [
+          'is_deleted' => 0,
+          // CORREÇÃO: Usando 'RAW' para a condição DATE_FORMAT
+          'RAW'        => [
+              "DATE_FORMAT(`date`, '%Y-%m-%d')" => $today
+          ]
+      ];
+
+      if (!empty($entity_filter)) {
+          $entity_ids = array_filter(array_map('intval', explode(',', $entity_filter)));
+          if (!empty($entity_ids)) {
+              $where['entities_id'] = ['IN', $entity_ids];
+          }
+      }
+
+      $iterator = $DB->request([
+          'COUNT' => '*',
+          'FROM'  => 'glpi_tickets',
+          'WHERE' => $where
+      ]);
+
+      if ($iterator && count($iterator) > 0) {
+          $row = $iterator->current();
+          return reset($row);
+      }
+
+      return 0;
+  }
 
    /**
     * Get user count
