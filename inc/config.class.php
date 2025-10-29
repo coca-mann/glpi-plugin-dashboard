@@ -222,13 +222,11 @@ class PluginDashboardConfig extends CommonDBTM {
 
       $where = [
           'is_deleted' => 0,
-          // CORREÇÃO: Usando 'RAW' para a condição DATE_FORMAT
           'RAW'        => [
-              "DATE_FORMAT(`date`, '%Y')" => $year // Use backticks `date` se necessário
+              "DATE_FORMAT(`date`, '%Y')" => $year
           ]
       ];
 
-      // Sanitiza e adiciona filtro de entidade se presente
       if (!empty($entity_filter)) {
           $entity_ids = array_filter(array_map('intval', explode(',', $entity_filter)));
           if (!empty($entity_ids)) {
@@ -237,19 +235,19 @@ class PluginDashboardConfig extends CommonDBTM {
       }
 
       $iterator = $DB->request([
-          'COUNT' => '*', // Conta todas as linhas que correspondem
+          // CORREÇÃO: Usar um alias válido para COUNT
+          'COUNT' => 'total',
           'FROM'  => 'glpi_tickets',
           'WHERE' => $where
       ]);
 
-      // Verifica se houve resultado antes de acessá-lo
       if ($iterator && count($iterator) > 0) {
           $row = $iterator->current();
-          // Retorna o primeiro valor (o COUNT) independentemente do nome da chave
-          return reset($row);
+          // CORREÇÃO: Acessar o resultado usando o alias
+          return (int)$row['total'];
       }
 
-      return 0; // Retorna 0 se não houver tickets
+      return 0;
   }
 
   /**
@@ -264,7 +262,6 @@ class PluginDashboardConfig extends CommonDBTM {
 
       $where = [
           'is_deleted' => 0,
-          // CORREÇÃO: Usando 'RAW' para a condição DATE_FORMAT
           'RAW'        => [
               "DATE_FORMAT(`date`, '%Y-%m')" => $month
           ]
@@ -278,14 +275,16 @@ class PluginDashboardConfig extends CommonDBTM {
       }
 
       $iterator = $DB->request([
-          'COUNT' => '*',
+          // CORREÇÃO: Usar um alias válido para COUNT
+          'COUNT' => 'total',
           'FROM'  => 'glpi_tickets',
           'WHERE' => $where
       ]);
 
       if ($iterator && count($iterator) > 0) {
           $row = $iterator->current();
-          return reset($row);
+           // CORREÇÃO: Acessar o resultado usando o alias
+          return (int)$row['total'];
       }
 
       return 0;
@@ -303,7 +302,6 @@ class PluginDashboardConfig extends CommonDBTM {
 
       $where = [
           'is_deleted' => 0,
-          // CORREÇÃO: Usando 'RAW' para a condição DATE_FORMAT
           'RAW'        => [
               "DATE_FORMAT(`date`, '%Y-%m-%d')" => $today
           ]
@@ -317,14 +315,16 @@ class PluginDashboardConfig extends CommonDBTM {
       }
 
       $iterator = $DB->request([
-          'COUNT' => '*',
+           // CORREÇÃO: Usar um alias válido para COUNT
+          'COUNT' => 'total',
           'FROM'  => 'glpi_tickets',
           'WHERE' => $where
       ]);
 
       if ($iterator && count($iterator) > 0) {
           $row = $iterator->current();
-          return reset($row);
+          // CORREÇÃO: Acessar o resultado usando o alias
+          return (int)$row['total'];
       }
 
       return 0;
