@@ -152,59 +152,63 @@ class PluginDashboardConfig extends CommonDBTM {
       return '';
    }
 
-   /**
-     * Get years for dashboard statistics
-     *
-     * @param int $num_years Number of years to retrieve
-     * @return array Array of years
-     */
-    static function getYears($num_years = -1) {
+   static function getYears($num_years = -1) {
       global $DB;
-
+  
       $iterator = null;
-
+  
       if ($num_years == -1) {
           // Obter todos os anos, em ordem ascendente
           $iterator = $DB->request([
-              // CORREÇÃO: Usando o namespace \Glpi\DBAL\QueryExpression
-              'SELECT'    => [new \Glpi\DBAL\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
-              'DISTINCT'  => true,
-              'FROM'      => 'glpi_tickets',
-              'WHERE'     => [
+              // CORREÇÃO: Alias 'AS year' dentro da QueryExpression
+              'SELECT'   => [new \Glpi\DBAL\QueryExpression('DATE_FORMAT(date, "%Y") AS year')],
+              'DISTINCT' => true,
+              'FROM'     => 'glpi_tickets',
+              'WHERE'    => [
                   'is_deleted' => 0,
                   'date'       => ['IS NOT', null]
               ],
-              'GROUPBY'   => ['year'],
-              'ORDERBY'   => ['year ASC']
+              // CORREÇÃO: GROUPBY deve usar o alias definido no SELECT
+              'GROUPBY'  => ['year'],
+              'ORDERBY'  => ['year ASC'] // ORDERBY também pode usar o alias
           ]);
-
+  
       } else {
           // Obter os últimos N anos, em ordem descendente
           $iterator = $DB->request([
-              // CORREÇÃO: Usando o namespace \Glpi\DBAL\QueryExpression
-              'SELECT'    => [new \Glpi\DBAL\QueryExpression('DATE_FORMAT(date, "%Y")') => 'year'],
-              'DISTINCT'  => true,
-              'FROM'      => 'glpi_tickets',
-              'WHERE'     => [
+               // CORREÇÃO: Alias 'AS year' dentro da QueryExpression
+              'SELECT'   => [new \Glpi\DBAL\QueryExpression('DATE_FORMAT(date, "%Y") AS year')],
+              'DISTINCT' => true,
+              'FROM'     => 'glpi_tickets',
+              'WHERE'    => [
                   'is_deleted' => 0,
                   'date'       => ['IS NOT', null]
               ],
-              'GROUPBY'   => ['year'],
-              'ORDERBY'   => ['year DESC'],
-              'LIMIT'     => $num_years
+              // CORREÇÃO: GROUPBY deve usar o alias definido no SELECT
+              'GROUPBY'  => ['year'],
+              'ORDERBY'  => ['year DESC'], // ORDERBY também pode usar o alias
+              'LIMIT'    => $num_years
           ]);
       }
-
+  
       $years = [];
       if ($iterator) {
           // Itera sobre o resultado do $DB->request
           foreach ($iterator as $row) {
+              // A coluna agora será 'year' por causa do alias
               $years[] = $row['year'];
           }
       }
-
+  
+      // Se $num_years != -1, os anos foram obtidos em ordem DESC, então revertemos para ASC
+      if ($num_years != -1) {
+         rsort($years); // Ordena em ordem decrescente e depois reverte para ascendente
+         $years = array_reverse($years);
+      }
+  
+  
       return $years;
-  }
+   }
 
    /**
     * Get ticket statistics for a year
